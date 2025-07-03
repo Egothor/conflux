@@ -1,3 +1,5 @@
+<img src=conflux.png width=20% align="right" />
+
 # Conflux
 
 **Conflux** is a Java library that provides a shared processing context
