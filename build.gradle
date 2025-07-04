@@ -6,7 +6,7 @@ plugins {
 }
 
 group 'org.egothor'
-version gitVersion()
+version gitVersion(prefix:'conflux@')
 
 repositories {
     // Use Maven Central for resolving dependencies.
