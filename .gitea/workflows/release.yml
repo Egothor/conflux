@@ -32,6 +32,8 @@ jobs:
 
       - name: Build and publish to Gitea Maven
         run: ./gradlew clean publish --no-daemon
+        env:
+          giteaToken: ${{ secrets.CI_PUBLISH_TOKEN }}
 
       - name: Upload built JAR
         uses: actions/upload-artifact@v3
