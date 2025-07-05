@@ -9,9 +9,6 @@ jobs:
   release:
     runs-on: ubuntu-latest
 
-    env:
-      giteaToken: ${{ secrets.CI_PUBLISH_TOKEN }}
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -23,17 +20,17 @@ jobs:
           java-version: 21
 
       - name: Cache Gradle
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
 
       - name: Build and publish to Gitea Maven
-        run: ./gradlew clean publish --no-daemon
-        env:
-          giteaToken: ${{ secrets.CI_PUBLISH_TOKEN }}
+        run: ./gradlew clean publish --no-daemon -PgiteaToken=${{ secrets.CI_PUBLISH_TOKEN }}
 
       - name: Upload built JAR
         uses: actions/upload-artifact@v3
