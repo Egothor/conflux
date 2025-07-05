@@ -36,27 +36,31 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
-        }
-    }
-    repositories {
-        maven {
-            name = "GiteaMaven"
-            url = uri("https://gitea.egothor.org/api/packages/Egothor/maven")
-            
-            credentials(HttpHeaderCredentials) {
-                name = "Authorization"
-                value = "token ${giteaToken}"
+if (project.hasProperty('giteaToken') && project.giteaToken) {
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                from components.java
             }
+        }
+        repositories {
+            maven {
+                name = "GiteaMaven"
+                url = uri("https://gitea.egothor.org/api/packages/Egothor/maven")
 
-            authentication {
-                header(HttpHeaderAuthentication)
+                credentials(HttpHeaderCredentials) {
+                    name = "Authorization"
+                    value = "token ${giteaToken}"
+                }
+
+                authentication {
+                    header(HttpHeaderAuthentication)
+                }
             }
         }
     }
+} else {
+    println "No giteaToken defined - skipping publishing configuration"
 }
 
 gradle.taskGraph.whenReady { taskGraph ->

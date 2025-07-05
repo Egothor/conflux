@@ -8,7 +8,7 @@ values and react to their changes in a clean and decoupled way.
 
 ## Key Features
 
-- Shared context for storing and retrieving named values  
-- Publish/subscribe event bus for listening to value changes  
-- Simple API for easy integration into existing projects  
-- Enables modular design by decoupling components through events 
+- Shared context for storing and retrieving named values
+- Publish/subscribe event bus for listening to value changes
+- Simple API for easy integration into existing projects
+- Enables modular design by decoupling components through events
