@@ -59,7 +59,7 @@ jobs:
               ;;
           esac
           next="$major.$minor.$patch"
-          new_tag="conflux@$next"
+          new_tag="release@$next"
           git tag -s $new_tag -m "Release $new_tag"
           git push origin $new_tag
           echo "Tagged $new_tag"
