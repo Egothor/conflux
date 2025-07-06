@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Java 21
         uses: actions/setup-java@v3
@@ -72,13 +74,12 @@ jobs:
             prefix="${category%%:*}"
             title="${category##*: }"
             entries=$(git log $range --pretty=format:"- %s" --grep="^$prefix" --no-merges)
-            echo -e "Found:\n\n$entries\n\n"
+          # echo -e "Found:\n\n$entries\n\n"
             if [[ -n "$entries" ]]; then
               body="$body\n\n### $title\n$entries"
             fi
           done
 
-          echo -e "$body"
           echo -e "$body" > /tmp/release_notes.md
 
       - name: Create Gitea Release
