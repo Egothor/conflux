@@ -72,6 +72,7 @@ jobs:
             prefix="${category%%:*}"
             title="${category##*: }"
             entries=$(git log $range --pretty=format:"- %s" --grep="^$prefix" --no-merges)
+            echo -e "Found:\n\n$entries\n\n"
             if [[ -n "$entries" ]]; then
               body="$body\n\n### $title\n$entries"
             fi
