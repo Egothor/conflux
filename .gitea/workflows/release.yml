@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-      - 'conflux@*'
+      - 'release@*'
 
 jobs:
   release:
@@ -38,9 +38,51 @@ jobs:
           name: conflux
           path: build/libs/*.jar
 
+      - name: Generate release notes
+        id: notes
+        run: |
+          current_tag="${{ github.ref_name }}"
+
+          # strip the prefix for sorting, keep prefix for matching
+          prefix="release@"
+
+          # get all matching tags, strip prefix, sort them
+          all_versions=$(git tag --list "${prefix}*" | sed "s/^${prefix}//" | sort -V)
+
+          # find previous version
+          previous_tag=""
+          for v in $all_versions; do
+            if [[ "$prefix$v" == "$current_tag" ]]; then
+              break
+            fi
+            previous_tag="$prefix$v"
+          done
+
+          if [[ -z "$previous_tag" ]]; then
+            range=""
+          else
+            range="$previous_tag..$current_tag"
+          fi
+
+          echo "Comparing range: $range"
+
+          body="## What's New"
+
+          for category in "feat: Features" "fix: Bug Fixes" "docs: Documentation" "chore: Chores"; do
+            prefix="${category%%:*}"
+            title="${category##*: }"
+            entries=$(git log $range --pretty=format:"- %s" --grep="^$prefix" --no-merges)
+            if [[ -n "$entries" ]]; then
+              body="$body\n\n### $title\n$entries"
+            fi
+          done
+
+          echo "$body" > /tmp/release_notes.md
+
       - name: Create Gitea Release
         uses: softprops/action-gh-release@v2
         with:
           files: build/libs/*.jar
           tag_name: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
+          body_path: /tmp/release_notes.md
