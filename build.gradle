@@ -6,7 +6,7 @@ plugins {
 }
 
 group 'org.egothor'
-version gitVersion(prefix:'conflux@')
+version gitVersion(prefix:'release@')
 
 repositories {
     // Use Maven Central for resolving dependencies.
@@ -25,6 +25,9 @@ java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
     }
+
+    withJavadocJar()
+    withSourcesJar()
 }
 
 javadoc {
