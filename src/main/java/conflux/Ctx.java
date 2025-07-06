@@ -57,7 +57,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * Usage:
  * 
  * <pre>
- * Key<Integer> COUNT = Key.of("count", Integer.class);
+ * Key&lt;Integer> COUNT = Key.of("count", Integer.class);
  * Ctx.INSTANCE.put(COUNT, 42);
  * int v = Ctx.INSTANCE.get(COUNT);
  * </pre>

@@ -39,6 +39,10 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
+tasks.withType(Javadoc).configureEach {
+    options.bottom = "Copyright &copy; 2025 Egothor"
+}
+
 if (project.hasProperty('giteaToken') && project.giteaToken) {
     publishing {
         publications {
