@@ -36,6 +36,7 @@ package conflux;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -157,6 +158,52 @@ public class CtxTest {
         Ctx.INSTANCE.put(intKey, 123);
         // cannot fully verify weakref GC predictably in unit tests
         assertTrue(flag[0] || !flag[0]);
+        System.out.println("...ok");
+    }
+
+    @Test
+    void testMultipleContextsIsolation() {
+        System.out.println("testMultipleContextsIsolation");
+        var ctxA = Ctx.INSTANCE.getContext("A");
+        var ctxB = Ctx.INSTANCE.getContext("B");
+
+        ctxA.put(intKey, 10);
+        ctxB.put(intKey, 20);
+
+        assertEquals(10, ctxA.get(intKey));
+        assertEquals(20, ctxB.get(intKey));
+        assertNull(Ctx.INSTANCE.get(intKey)); // Default context is separate
+
+        ctxA.clear();
+        assertFalse(ctxA.contains(intKey));
+        assertEquals(20, ctxB.get(intKey));
+
+        System.out.println("...ok");
+    }
+
+    @Test
+    void testListenerNotificationInSeparateContexts() {
+        System.out.println("testListenerNotificationInSeparateContexts");
+        var ctxA = Ctx.INSTANCE.getContext("A");
+        var ctxB = Ctx.INSTANCE.getContext("B");
+
+        var resultA = new StringBuilder();
+        var resultB = new StringBuilder();
+
+        Listener<Integer> listenerA = v -> resultA.append(v);
+        Listener<Integer> listenerB = v -> resultB.append(v);
+
+        ctxA.addListener(intKey, listenerA);
+        ctxB.addListener(intKey, listenerB);
+
+        ctxA.put(intKey, 1);
+        ctxB.put(intKey, 2);
+        ctxA.put(intKey, 3);
+        ctxB.put(intKey, 4);
+
+        assertEquals("13", resultA.toString());
+        assertEquals("24", resultB.toString());
+
         System.out.println("...ok");
     }
 }
