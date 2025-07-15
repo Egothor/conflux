@@ -63,6 +63,16 @@ public final class CtxInstance implements CtxInterface {
     private final Map<Key<?>, List<WeakReference<Listener<?>>>> listeners = new ConcurrentHashMap<>();
 
     /**
+     * Protected no-argument constructor added to satisfy code analysis tools.
+     * <p>
+     * This constructor should not be used directly. It exists solely to comply with
+     * static analysis requirements (e.g., PMD) expecting at least one constructor.
+     */
+    protected CtxInstance() {
+        // Intentionally left blank
+    }
+
+    /**
      * Stores or updates the value for a given key. If the key is used for the first
      * time, its type is recorded. If the key has been used before with a different
      * type, an exception will be thrown.
