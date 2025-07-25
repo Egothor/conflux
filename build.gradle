@@ -3,6 +3,7 @@ plugins {
     id 'java-library'
     id 'maven-publish'
     id 'com.palantir.git-version' version '4.0.0'
+    id 'pmd'
 }
 
 group 'org.egothor'
@@ -18,6 +19,13 @@ dependencies {
     testImplementation(libs.junit.jupiter)
 
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+
+pmd {
+	consoleOutput = true
+	toolVersion = '7.16.0'
+	sourceSets = [sourceSets.main]
+	ruleSetFiles = files(rootProject.file(".ruleset"))
 }
 
 // Apply a specific Java toolchain to ease working on different environments.

@@ -42,19 +42,19 @@ package conflux;
  * @author Leo Galambos
  */
 public final class Key<T> { // NOPMD by Leo Galambos on 7/3/25, 10:29 PM
-    private final String name;
-    private final Class<T> type;
+    private final String nameField;
+    private final Class<T> typeField;
 
     private Key(String name, Class<T> type) {
-        this.name = name;
-        this.type = type;
+        this.nameField = name;
+        this.typeField = type;
     }
 
     /**
      * Creates a new typed key.
      *
-     * @param name a unique key name
-     * @param type the class of the key's value type
+     * @param name a unique key nameField
+     * @param type the class of the key's value typeField
      * @param <T>  the type
      * @return a new {@code Key}
      */
@@ -68,7 +68,7 @@ public final class Key<T> { // NOPMD by Leo Galambos on 7/3/25, 10:29 PM
      * @return the name
      */
     public String name() {
-        return name;
+        return nameField;
     }
 
     /**
@@ -77,21 +77,21 @@ public final class Key<T> { // NOPMD by Leo Galambos on 7/3/25, 10:29 PM
      * @return the type
      */
     public Class<T> type() {
-        return type;
+        return typeField;
     }
 
     @Override
     public int hashCode() {
-        return name.hashCode();
+        return nameField.hashCode();
     }
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof Key<?> other && name.equals(other.name);
+        return obj instanceof Key<?> other && nameField.equals(other.nameField);
     }
 
     @Override
     public String toString() {
-        return "Key[" + name + ", " + type.getSimpleName() + "]";
+        return "Key[" + nameField + ", " + typeField.getSimpleName() + "]";
     }
 }

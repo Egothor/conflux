@@ -108,10 +108,10 @@ public final class CtxInstance implements CtxInterface {
         }
 
         // notify listeners
-        var list = listeners.get(key);
+        List<WeakReference<Listener<?>>> list = listeners.get(key);
         if (list != null) {
-            for (var ref : list) {
-                var listener = ref.get();
+            for (WeakReference<Listener<?>> ref : list) {
+                Listener<?> listener = ref.get();
                 if (listener != null) {
                     @SuppressWarnings("unchecked")
                     Listener<T> typedListener = (Listener<T>) listener;
@@ -156,7 +156,7 @@ public final class CtxInstance implements CtxInterface {
     @Override
     public Object remove(Key<?> key) {
         keyTypes.remove(key.name());
-        var removed = values.remove(key);
+        Object removed = values.remove(key);
         listeners.remove(key);
         return removed;
     }
@@ -193,10 +193,10 @@ public final class CtxInstance implements CtxInterface {
      */
     @Override
     public <T> void removeListener(Key<T> key, Listener<T> listener) {
-        var list = listeners.get(key);
+        List<WeakReference<Listener<?>>> list = listeners.get(key);
         if (list != null) {
             list.removeIf(ref -> {
-                var l = ref.get();
+                Listener<?> l = ref.get();
                 return l == null || l.equals(listener);
             });
             if (list.isEmpty()) {
