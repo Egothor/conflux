@@ -40,7 +40,7 @@ jobs:
 
       - name: Bump version and tag
         run: |
-          latest=$(git tag --list 'conflux@*' | sed 's/conflux@//' | sort -V | tail -n 1)
+          latest=$(git tag --list 'release@*' | sed 's/release@//' | sort -V | tail -n 1)
           if [[ -z "$latest" ]]; then
             latest="0.0.0"
           fi
