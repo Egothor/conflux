@@ -42,7 +42,7 @@ jobs:
           apt install -y rsync
 
       - name: Build and publish to Gitea Maven and JavaDoc to the website
-        run: ./gradlew clean publish uploadJavadoc --no-daemon -PgiteaToken=${{ secrets.CI_PUBLISH_TOKEN }} -PjavadocUser=${{ vars.JAVADOC_USER }} -PjavadocHost=${{ vars.JAVADOC_HOST }} -PjavadocPath=${{ vars.JAVADOC_PATH }} -PjavadocKeyPath=~/.ssh/id_rsa --debug
+        run: ./gradlew clean publish uploadJavadoc --no-daemon -PgiteaToken=${{ secrets.CI_PUBLISH_TOKEN }} -PjavadocUser=${{ vars.JAVADOC_USER }} -PjavadocHost=${{ vars.JAVADOC_HOST }} -PjavadocPath=${{ vars.JAVADOC_PATH }} -PjavadocKeyPath=~/.ssh/id_rsa
 
       - name: Generate release notes
         id: notes

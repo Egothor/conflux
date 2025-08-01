@@ -12,3 +12,28 @@ values and react to their changes in a clean and decoupled way.
 - Publish/subscribe event bus for listening to value changes
 - Simple API for easy integration into existing projects
 - Enables modular design by decoupling components through events
+
+## Getting Started
+
+Add to your `build.gradle`:
+```groovy
+repositories {
+    
+    maven {
+        name = "GiteaMaven"
+        url = uri("https://gitea.egothor.org/api/packages/Egothor/maven")
+    }
+    
+    // Use Maven Central for resolving dependencies.
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.egothor:conflux:x.x.x'
+}
+```
+
+## Documentation
+
+- [Conflux JavaDoc](https://www.egothor.org/javadoc/conflux/)
+- [Conflux Wiki](https://gitea.egothor.org/Egothor/conflux/wiki)
