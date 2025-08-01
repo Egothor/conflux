@@ -44,8 +44,8 @@ jobs:
         run: >
           ./gradlew uploadJavadoc
             -PjavadocUser=${{ vars.JAVADOC_USER }}
-            -PjavadocHost=${{ vars.$JAVADOC_HOST }}
-            -PjavadocPath=${{ vars.$JAVADOC_PATH }}
+            -PjavadocHost=${{ vars.JAVADOC_HOST }}
+            -PjavadocPath=${{ vars.JAVADOC_PATH }}
             -PjavadocPrivateKeyPath=~/.ssh/id_rsa
 
       - name: Generate release notes
