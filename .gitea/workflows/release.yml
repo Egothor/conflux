@@ -35,7 +35,8 @@ jobs:
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.JAVADOC_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
+          echo "${{ secrets.CI_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          chmod -R 600 ~/.ssh
 
       - name: Build and publish to Gitea Maven and JavaDoc to the website
         run: ./gradlew clean publish uploadJavadoc --no-daemon -PgiteaToken=${{ secrets.CI_PUBLISH_TOKEN }} -PjavadocUser=${{ vars.JAVADOC_USER }} -PjavadocHost=${{ vars.JAVADOC_HOST }} -PjavadocPath=${{ vars.JAVADOC_PATH }} -PjavadocKeyPath=~/.ssh/id_rsa --debug
