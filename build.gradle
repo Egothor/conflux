@@ -51,6 +51,23 @@ tasks.withType(Javadoc).configureEach {
     options.bottom = "Copyright &copy; 2025 Egothor"
 }
 
+task uploadJavadoc(type: Exec) {
+    dependsOn javadoc
+
+    doFirst {
+        def javadocDir = tasks.javadoc.destinationDir
+        def relativeJavadocDir = project.projectDir.toPath().relativize(javadocDir.toPath()).toString()
+
+        println "Uploading Javadoc with key: ${javadocKeyPath}"
+        println "                  from relative path: $relativeJavadocDir"
+
+        commandLine "rsync", "-avz", "--delete",
+          "-e", "ssh -i ${javadocKeyPath} -o IdentitiesOnly=yes",
+          relativeJavadocDir + '/', "${javadocUser}@${javadocHost}:${javadocPath}"
+    }
+
+}
+
 if (project.hasProperty('giteaToken') && project.giteaToken) {
     publishing {
         publications {

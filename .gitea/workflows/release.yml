@@ -34,11 +34,19 @@ jobs:
       - name: Build and publish to Gitea Maven
         run: ./gradlew clean publish --no-daemon -PgiteaToken=${{ secrets.CI_PUBLISH_TOKEN }}
 
-      - name: Upload built JAR
-        uses: actions/upload-artifact@v3
-        with:
-          name: conflux
-          path: build/libs/*.jar
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.JAVADOC_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+      - name: Upload Javadoc to server
+        run: >
+          ./gradlew uploadJavadoc
+            -PjavadocUser=${{ vars.JAVADOC_USER }}
+            -PjavadocHost=${{ vars.$JAVADOC_HOST }}
+            -PjavadocPath=${{ vars.$JAVADOC_PATH }}
+            -PjavadocPrivateKeyPath=~/.ssh/id_rsa
 
       - name: Generate release notes
         id: notes
