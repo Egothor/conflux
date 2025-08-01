@@ -38,8 +38,7 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
 
       - name: Build and publish to Gitea Maven and JavaDoc to the website
-        run:
-          ./gradlew clean publish uploadJavadoc           \
+        run: ./gradlew clean publish uploadJavadoc        \
             --no-daemon                                   \
             -PgiteaToken=${{ secrets.CI_PUBLISH_TOKEN }}  \
             -PjavadocUser=${{ vars.JAVADOC_USER }}        \
