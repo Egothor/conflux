@@ -31,18 +31,17 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      - name: Build and publish to Gitea Maven
-        run: ./gradlew clean publish --no-daemon -PgiteaToken=${{ secrets.CI_PUBLISH_TOKEN }}
-
       - name: Setup SSH key
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.JAVADOC_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
-      - name: Upload Javadoc to server
+      - name: Build and publish to Gitea Maven and JavaDoc to the website
         run: >
-          ./gradlew uploadJavadoc
+          ./gradlew clean publish uploadJavadoc
+            --no-daemon
+            -PgiteaToken=${{ secrets.CI_PUBLISH_TOKEN }}
             -PjavadocUser=${{ vars.JAVADOC_USER }}
             -PjavadocHost=${{ vars.JAVADOC_HOST }}
             -PjavadocPath=${{ vars.JAVADOC_PATH }}
