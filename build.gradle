@@ -6,6 +6,10 @@ plugins {
     id 'pmd'
 }
 
+import java.time.LocalDate
+
+def currentYear=LocalDate.now().getYear()
+
 group 'org.egothor'
 version gitVersion(prefix:'release@')
 
@@ -39,16 +43,35 @@ java {
 }
 
 javadoc {
-        failOnError = false
-}
+    failOnError = false
+    
+    options.addBooleanOption('html5', true)
+    options.tags('apiNote:a:API Note:')
+    options.tags('implSpec:a:Implementation Requirements:')
+    options.tags('implNote:a:Implementation Note:')
+    options.tags('param')
+    options.tags('return')
+    options.tags('throws')
+    options.tags('since')
+    options.tags('version')
+    options.tags('serialData')
+    options.tags('factory')
+    options.tags('see')
+    
+    options.use = true
+    options.author = true
+    options.version = true
+    options.windowTitle = 'Conflux'
+    
+    options.bottom = '<div style="text-align: right; padding: 5px;">Copyright &copy; ' + currentYear +
+                     ' Egothor - Version ' + version +
+                     ' - <a href="https://gitea.egothor.org/Egothor/conflux/raw/branch/main/LICENSE">License</a>' +
+                     '</div>'
+    source = sourceSets.main.allJava}
 
 tasks.named('test') {
     // Use JUnit Platform for unit tests.
     useJUnitPlatform()
-}
-
-tasks.withType(Javadoc).configureEach {
-    options.bottom = "Copyright &copy; 2025 Egothor"
 }
 
 task uploadJavadoc(type: Exec) {
