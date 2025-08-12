@@ -86,6 +86,46 @@ public enum Ctx implements CtxInterface {
     }
 
     /**
+     * Removes a named context previously created via {@link #getContext(String)}.
+     * <p>
+     * The context is atomically removed from the internal registry and then
+     * {@linkplain CtxInterface#clear() cleared} to release stored values and
+     * listener references. This operation is thread-safe and idempotent: if the
+     * specified context does not exist, the method returns {@code false} and
+     * performs no action.
+     * </p>
+     * <p>
+     * Calling {@code getContext(name)} again after a successful removal will create
+     * a brand-new, empty context. The default/global context represented by
+     * {@link #INSTANCE} is not affected.
+     * </p>
+     *
+     * @param name the name of the context to remove; must not be {@code null} or
+     *             blank
+     * @return {@code true} if a context with the given name existed and was
+     *         removed; {@code false} otherwise
+     * @throws IllegalArgumentException if {@code name} is {@code null} or blank
+     * @implNote Uses {@link ConcurrentHashMap#remove(Object)} for atomic removal,
+     *           then invokes {@link CtxInterface#clear()} on the removed instance.
+     * @since 2025.08
+     */
+    public boolean removeContext(String name) {
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("name must not be null or blank");
+        }
+        CtxInterface ctx = contexts.remove(name);
+        final boolean existed = ctx != null;
+        if (existed) {
+            try {
+                ctx.clear();
+            } catch (RuntimeException ignore) { // NOPMD
+                // Best-effort cleanup; deregistration already succeeded.
+            }
+        }
+        return existed;
+    }
+
+    /**
      * Returns the set of names for all currently registered contexts.
      *
      * @return an immutable set of context names
