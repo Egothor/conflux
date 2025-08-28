@@ -34,9 +34,12 @@
  */
 package conflux;
 
+import java.lang.ref.ReferenceQueue;
+import java.lang.ref.WeakReference;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * A central context manager for storing and retrieving key-value pairs in a
@@ -62,15 +65,77 @@ public enum Ctx implements CtxInterface {
     INSTANCE;
 
     /**
-     * A registry of named contexts, allowing for multiple isolated logical
-     * contexts.
-     */
-    private final Map<String, CtxInterface> contexts = new ConcurrentHashMap<>();
-    /**
      * The default context instance used by this enum singleton. All interface
      * method calls delegate to this context.
      */
     private final CtxInterface defaultCtx = new CtxInstance();
+
+    /**
+     * A registry of named contexts, allowing for multiple isolated logical
+     * contexts.
+     */
+    private final Map<String, NamedWeakRef> contexts = new ConcurrentHashMap<>();
+
+    /**
+     * A reference queue to learn when weakly referenced contexts are collected.
+     */
+    private final transient ReferenceQueue<CtxInterface> refQueue = new ReferenceQueue<>();
+
+    /**
+     * A weak reference wrapper that associates a {@link CtxInterface} instance (the
+     * referent) with its corresponding context name.
+     * <p>
+     * Instances of this class are enqueued into a {@link ReferenceQueue} once their
+     * referent becomes unreachable. The extra {@code name} field allows the owning
+     * registry to efficiently remove the corresponding entry from the context map
+     * without requiring a reverse lookup.
+     * </p>
+     *
+     * <h2>Usage</h2>
+     * <ul>
+     * <li>Created whenever a new named context is registered.</li>
+     * <li>Placed into a {@link ConcurrentHashMap} keyed by the same
+     * {@code name}.</li>
+     * <li>When the referent is garbage-collected, this reference is automatically
+     * enqueued, and the registry removes the map entry associated with
+     * {@link #name}.</li>
+     * </ul>
+     *
+     * <p>
+     * This design ensures that contexts are automatically deregistered when no
+     * strong references to them remain, preventing memory leaks while still
+     * allowing explicit removal via {@code removeContext}.
+     * </p>
+     */
+    private static final class NamedWeakRef extends WeakReference<CtxInterface> {
+        /**
+         * The context name associated with the referent.
+         */
+        private final String name;
+
+        /**
+         * Creates a new weak reference to the given context instance and associates it
+         * with the provided name.
+         *
+         * @param name     the context name; used as the key in the registry
+         * @param referent the context instance being weakly referenced
+         * @param q        the reference queue with which the weak reference is
+         *                 registered
+         */
+        private NamedWeakRef(String name, CtxInterface referent, ReferenceQueue<CtxInterface> q) {
+            super(referent, q);
+            this.name = name;
+        }
+    }
+
+    /**
+     * Remove collected references from map.
+     */
+    private void drainQueue() {
+        for (NamedWeakRef ref; (ref = (NamedWeakRef) refQueue.poll()) != null;) { // NOPMD
+            contexts.remove(ref.name, ref);
+        }
+    }
 
     /**
      * Returns a named context. If the context does not exist, it is lazily created.
@@ -82,7 +147,26 @@ public enum Ctx implements CtxInterface {
      * @return the associated context instance
      */
     public CtxInterface getContext(String name) {
-        return contexts.computeIfAbsent(name, k -> new CtxInstance());
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("name must not be null or blank");
+        }
+        drainQueue();
+        NamedWeakRef ref = contexts.compute(name, (k, existing) -> {
+            CtxInterface alive = existing == null ? null : existing.get();
+            if (alive != null) {
+                return existing;
+            }
+            CtxInterface created = new CtxInstance();
+            return new NamedWeakRef(k, created, refQueue);
+        });
+        CtxInterface ctx = ref.get();
+        if (ctx == null) {
+            CtxInterface created = new CtxInstance();
+            NamedWeakRef fresh = new NamedWeakRef(name, created, refQueue);
+            contexts.put(name, fresh);
+            ctx = created;
+        }
+        return ctx;
     }
 
     /**
@@ -113,16 +197,19 @@ public enum Ctx implements CtxInterface {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("name must not be null or blank");
         }
-        CtxInterface ctx = contexts.remove(name);
-        final boolean existed = ctx != null;
-        if (existed) {
+        drainQueue();
+        NamedWeakRef ref = contexts.remove(name);
+        if (ref == null) {
+            return false; // NOPMD
+        }
+        CtxInterface ctx = ref.get();
+        if (ctx != null) {
             try {
                 ctx.clear();
             } catch (RuntimeException ignore) { // NOPMD
-                // Best-effort cleanup; deregistration already succeeded.
             }
         }
-        return existed;
+        return true;
     }
 
     /**
@@ -131,7 +218,9 @@ public enum Ctx implements CtxInterface {
      * @return an immutable set of context names
      */
     public Set<String> contextNames() {
-        return Set.copyOf(contexts.keySet());
+        drainQueue();
+        return Set.copyOf(contexts.entrySet().stream().filter(e -> e.getValue().get() != null).map(Map.Entry::getKey)
+                .collect(Collectors.toSet()));
     }
 
     /**
