@@ -2,6 +2,7 @@ plugins {
     // Apply the java-library plugin for API and implementation separation.
     id 'java-library'
     id 'maven-publish'
+    id 'signing'
     id 'com.palantir.git-version' version '4.0.0'
     id 'pmd'
 }
@@ -11,7 +12,7 @@ import java.time.LocalDate
 def currentYear=LocalDate.now().getYear()
 
 group 'org.egothor'
-version gitVersion(prefix:'release@')
+version = providers.gradleProperty('releaseVersion').getOrElse(gitVersion(prefix: 'release@'))
 
 repositories {
     // Use Maven Central for resolving dependencies.
@@ -65,7 +66,7 @@ javadoc {
     
     options.bottom = '<div style="text-align: right; padding: 5px;">Copyright &copy; ' + currentYear +
                      ' Egothor - Version ' + version +
-                     ' - <a href="https://gitea.egothor.org/Egothor/conflux/raw/branch/main/LICENSE">License</a>' +
+                     ' - <a href="https://github.com/Egothor/conflux/blob/main/LICENSE.md">License</a>' +
                      '</div>'
     source = sourceSets.main.allJava}
 
@@ -91,31 +92,57 @@ task uploadJavadoc(type: Exec) {
 
 }
 
-if (project.hasProperty('giteaToken') && project.giteaToken) {
-    publishing {
-        publications {
-            mavenJava(MavenPublication) {
-                from components.java
-            }
-        }
-        repositories {
-            maven {
-                name = "GiteaMaven"
-                url = uri("https://gitea.egothor.org/api/packages/Egothor/maven")
-
-                credentials(HttpHeaderCredentials) {
-                    name = "Authorization"
-                    value = "token ${giteaToken}"
+// A local Maven layout is bundled by GitHub Actions for the Central Publisher API.
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            pom {
+                name = 'Conflux'
+                description = 'A shared processing context and event bus for Java components.'
+                url = 'https://github.com/Egothor/conflux'
+                licenses {
+                    license {
+                        name = 'BSD 3-Clause License (binary artifacts)'
+                        url = 'https://github.com/Egothor/conflux/blob/main/LICENSE.md'
+                        distribution = 'repo'
+                    }
+                    license {
+                        name = 'BSD 4-Clause License (source distributions)'
+                        url = 'https://github.com/Egothor/conflux/blob/main/LICENSE.md'
+                        distribution = 'repo'
+                    }
                 }
-
-                authentication {
-                    header(HttpHeaderAuthentication)
+                developers {
+                    developer {
+                        name = 'Leo Galambos'
+                        email = 'lg@hq.egothor.org'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:https://github.com/Egothor/conflux.git'
+                    developerConnection = 'scm:git:ssh://git@github.com/Egothor/conflux.git'
+                    url = 'https://github.com/Egothor/conflux'
                 }
             }
         }
     }
-} else {
-    println "No giteaToken defined - skipping publishing configuration"
+    repositories {
+        maven {
+            name = 'CentralBundle'
+            url = layout.buildDirectory.dir('central-repository')
+        }
+    }
+}
+
+signing {
+    def signingKey = providers.environmentVariable('MAVEN_SIGNING_KEY').orNull
+    def signingPassword = providers.environmentVariable('MAVEN_SIGNING_PASSWORD').orNull
+    if (signingKey) {
+        useInMemoryPgpKeys(signingKey, signingPassword)
+    }
+    required { gradle.taskGraph.hasTask(':publishMavenJavaPublicationToCentralBundleRepository') }
+    sign publishing.publications.mavenJava
 }
 
 gradle.taskGraph.whenReady { taskGraph ->
