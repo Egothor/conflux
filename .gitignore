@@ -104,3 +104,7 @@ gradle-app.setting
 
 # Ignore Gradle build output directory
 build
+
+# Local documentation environment and generated site
+.venv/
+site/

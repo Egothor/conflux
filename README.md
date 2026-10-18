@@ -28,8 +28,28 @@ dependencies {
 
 ## Documentation
 
-- [Conflux JavaDoc](https://www.egothor.org/javadoc/conflux/)
-- [Conflux Wiki](https://gitea.egothor.org/Egothor/conflux/wiki)
+- [Conflux documentation](https://www.egothor.org/conflux/)
+- [Conflux JavaDoc](https://www.egothor.org/conflux/javadoc/)
+- [Development guide](docs/development.md)
+
+Java 21 is required. To preview the MkDocs Material manual locally:
+
+```sh
+python3 -m venv .venv
+.venv/bin/python -m pip install -r requirements-docs.txt
+.venv/bin/mkdocs serve
+```
+
+To build the complete documentation site, including JavaDoc:
+
+```sh
+.venv/bin/mkdocs build --strict
+./gradlew javadoc
+cp -R build/docs/javadoc site/javadoc
+```
+
+The separate documentation workflow validates changes to sources and documentation
+and publishes the combined site to GitHub Pages from the default branch.
 
 ## Releases on GitHub
 

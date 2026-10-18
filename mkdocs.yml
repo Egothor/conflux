@@ -1,0 +1,58 @@
+site_name: Conflux
+site_description: A shared processing context and synchronous event bus for Java components.
+site_url: https://www.egothor.org/conflux/
+repo_url: https://github.com/Egothor/conflux
+repo_name: Egothor/conflux
+edit_uri: edit/main/docs/
+copyright: Copyright © Egothor · BSD licensed
+strict: true
+extra:
+  generator: false
+theme:
+  name: material
+  language: en
+  logo: assets/conflux.png
+  favicon: assets/conflux.png
+  font: false
+  palette:
+    - scheme: default
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - scheme: slate
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - navigation.footer
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+plugins:
+  - search
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+  - tables
+extra_css:
+  - stylesheets/extra.css
+nav:
+  - Overview: index.md
+  - Get started: getting-started.md
+  - Guide:
+      - Context and events: guide/context-and-events.md
+      - Behaviour and guarantees: reference/behaviour.md
+  - JavaDoc: https://www.egothor.org/conflux/javadoc/
+  - Development: development.md

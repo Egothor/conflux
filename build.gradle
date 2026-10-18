@@ -44,7 +44,7 @@ java {
 }
 
 javadoc {
-    failOnError = false
+    failOnError = true
     
     options.addBooleanOption('html5', true)
     options.tags('apiNote:a:API Note:')
@@ -73,23 +73,6 @@ javadoc {
 tasks.named('test') {
     // Use JUnit Platform for unit tests.
     useJUnitPlatform()
-}
-
-task uploadJavadoc(type: Exec) {
-    dependsOn javadoc
-
-    doFirst {
-        def javadocDir = tasks.javadoc.destinationDir
-        def relativeJavadocDir = project.projectDir.toPath().relativize(javadocDir.toPath()).toString()
-
-        println "Uploading Javadoc with key: ${javadocKeyPath}"
-        println "                  from relative path: $relativeJavadocDir"
-
-        commandLine "rsync", "-avz", "--delete",
-          "-e", "ssh -i ${javadocKeyPath} -o IdentitiesOnly=yes",
-          relativeJavadocDir + '/', "${javadocUser}@${javadocHost}:${javadocPath}"
-    }
-
 }
 
 // A local Maven layout is bundled by GitHub Actions for the Central Publisher API.
