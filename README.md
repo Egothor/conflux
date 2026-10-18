@@ -36,7 +36,11 @@ dependencies {
 Push a tag such as `release@1.2.3` to run `.github/workflows/release.yml`.
 The tag suffix becomes the Maven version. The workflow runs `check`, builds
 and signs the main, sources and Javadoc JARs and POM, uploads a bundle to
-Maven Central, waits for `PUBLISHED`, then creates a GitHub Release.
+Maven Central, then creates a GitHub Release once Central accepts the upload.
+Central validates and publishes the deployment asynchronously; the workflow
+does not wait for publication. Check the deployment ID in the workflow summary
+in the Central Portal for validation results and publication status. Artifacts
+may become available on Central after the GitHub Release is created.
 The `org.egothor` namespace must be verified for your Central account.
 
 Configure these GitHub Actions repository secrets before the first release:
